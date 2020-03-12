@@ -1,0 +1,1002 @@
+swagger: '2.0'
+x-asee-visibility: internal
+host: bankapi.net
+basePath: /beta/electronic-access
+schemes:
+  - https
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+tags:
+  - name: Electronic Access
+    description: Working with electronic access arrangements
+  - name: Electronic Access Packages
+    description: Working with electronic access packages
+  - name: Classifications
+    description: Working with classifications
+
+info:
+  description: Working with electronic access arrangements.  
+  title: Electronic Access API
+  version: beta
+  contact:
+    name: TODO
+    url: https://bankapi.net/docs/public/electronic-access-arrangement-getstarted.html
+    email: todo@asseco-see.rs
+
+paths:
+
+# **************************************************************** #
+# COMMON ENDPOINTS FOR ALL KINDS OF ELECTRONIC ACCESS ARRANGEMENTS #
+# **************************************************************** #
+
+  /electronic-access-arrangement:
+    get:
+      summary: List electronic access arrangements
+      description: Response contains list of electronic access arrangements that match supplied filters
+      operationId: ElectronicAccess_GetList
+      tags: [Electronic Access]      
+      x-asee-tags: [paging, sorting, shaping]
+      parameters: 
+        - $ref: '#/parameters/customer-number-param'
+        - $ref: '#/parameters/origination-ou-param'
+        - $ref: '#/parameters/servicing-ou-param'
+        - $ref: '#/parameters/agent-param'
+        - $ref: '#/parameters/date-from'
+        - $ref: '#/parameters/date-to'
+        - $ref: "#/parameters/page-param"
+        - $ref: "#/parameters/page-size-param"
+        - $ref: "#/parameters/sort-by-param"
+        - $ref: "#/parameters/sort-order-param"
+        - $ref: "#/parameters/trim-param"
+        - $ref: "#/parameters/include-param"        
+      responses:
+        default:
+          $ref: '#/responses/default-error-response'
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/electronic-access-arrangement-list'          
+    post:
+      summary: Establish new electronic access arrangement 
+      description: Establishes new electronic access arrangement
+      operationId: ElectronicAccess_Establish
+      tags: [Electronic Access]
+      parameters:
+        - description: Details on electronic access arrangement to be established
+          name: cmd
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/establish-electronic-access-command'  
+      responses:
+        default:
+          $ref: '#/responses/default-error-response'
+        201:
+          description: Created - Electronic Access arrangement was established
+          schema:
+            type: string
+            description: Electronic access arrangement number
+        440:
+          description: |
+            Your request was well constructed but it could not be processed due to business policy. Consider the following possible problems and look into response for more details:
+            - [customer-not-recognized](electronic-access-problems.html)
+            - [customer-has-active-witholding](electronic-access-problems.html) 
+            
+  /electronic-access-arrangement/validate:
+    post:
+      summary: Validates  new electronic access arrangement 
+      description: Validates new electronic access arrangement
+      operationId: ElectronicAccess_Validate
+      tags: [Electronic Access]
+      parameters:
+        - description: Details on electronic access arrangement to be validated
+          name: cmd
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/validate-electronic-access-command'  
+      responses:
+        default:
+          $ref: '#/responses/default-error-response'
+        201:
+          description: Accepted - Electronic Access arrangement was validated
+          schema:
+            type: string
+            description: Electronic access arrangement number
+        440:
+          description: |
+            Your request was well constructed but it does not comply with business policy. Consider the following possible problems and look into response for more details:
+            - [customer-not-recognized](electronic-access-problems.html)
+            - [customer-has-active-arrangement](electronic-access-problems.html) 
+            
+  /electronic-access-arrangement/{arrangement-number}:
+    parameters: [$ref: '#/parameters/arrangement-number-param']
+    get:
+      summary: Get details of specific electronic access arrangement
+      description: Response contains details of specific electronic access arrangement.
+      operationId: ElectronicAccess_Get
+      tags: [Electronic Access]      
+      x-asee-tags: [shaping]
+      parameters: 
+        - $ref: "#/parameters/trim-param"
+        - $ref: "#/parameters/include-param"        
+      responses:
+        default:
+          $ref: '#/responses/default-error-response'
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/electronic-access-arrangement-details'                    
+            
+  /electronic-access-arrangement/{arrangement-number}/cancel:
+    parameters: [$ref: '#/parameters/arrangement-number-param']
+    post:
+      summary: Cancel electronic access arrangement
+      description: Cancel specific electronic access arrangement
+      operationId: ElectronicAccess_Cancel
+      tags: [Electronic Access]
+      parameters:
+        - description: Command with cancelation details
+          name: cmd
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/cancel-electronic-access-command'  
+      responses:
+        default:
+          $ref: '#/responses/default-error-response'
+        204:
+          description: No Content - Electronic access arrangement was canceled
+        440:
+          description: |
+            Your request was well constructed but it could not be processed due to business policy. Consider the following possible problems and look into response for more details:               
+            - [electronic-access-arrangement-already-canceled](electronic-access-problems.html)              
+
+  /electronic-access-package:
+    get:
+      summary: List electronic access packages
+      description: Response contains list of electronic access packages that match supplied filters
+      operationId: ElectronicAccessPackage_GetList
+      tags: [Electronic Access Packages]      
+      x-asee-tags: [paging, sorting, shaping]
+      parameters: 
+        - $ref: "#/parameters/page-param"
+        - $ref: "#/parameters/page-size-param"
+        - $ref: "#/parameters/sort-by-param"
+        - $ref: "#/parameters/sort-order-param"
+        - $ref: "#/parameters/trim-param"
+        - $ref: "#/parameters/include-param"        
+      responses:
+        default:
+          $ref: '#/responses/default-error-response'
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/electronic-access-package-list'          
+    
+  /electronic-access-package/{package-identifier}:
+    parameters: [$ref: '#/parameters/package-identifier-param']
+    get:
+      summary: Get details of specific electronic access arrangement
+      description: Response contains details of specific electronic access arrangement.
+      operationId: ElectronicAccessPackage_Get
+      tags: [Electronic Access Packages] 
+      x-asee-tags: [shaping]
+      parameters: 
+        - $ref: "#/parameters/trim-param"
+        - $ref: "#/parameters/include-param"        
+      responses:
+        default:
+          $ref: '#/responses/default-error-response'
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/electronic-access-package-info'                    
+
+  /classifications: 
+    get:
+      summary: List all classification schemas used by the API
+      description: Some fields and parameters have been restricted to a list of allowed lookup values maintained by the bank. This method lists all schemas used in this API.    
+      operationId: "Classifications_GetList"
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/classification-list'
+        default:
+          $ref: '#/responses/default-error-response'
+      tags:
+        - Classifications
+
+  /classifications/{schema-id}:
+    get:
+      summary: List values allowed by given classification schema.
+      description: Returns all classification values for chosen classification.
+      operationId: Classifications_Get
+      parameters:
+        - $ref: '#/parameters/schema-id-param'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/classification'
+        default:
+          $ref: '#/responses/default-error-response'
+      tags:
+        - Classifications
+
+responses:
+  default-error-response:
+    description: Besides specific status codes above, other standard http [status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html) can be returned for each request. To learn more see general guidance on [error handling](common-getstarted.html#error-handling)
+    
+parameters:
+  
+  arrangement-number-param:
+    description: Unique identifier of electronic access arrangement
+    in: path
+    name: arrangement-number
+    type: string
+    required: true
+    
+  package-identifier-param:
+    description: Unique identifier of electronic access package
+    in: path
+    name: package-identifier
+    type: string
+    required: true
+   
+  customer-number-param:
+    description: Unique identifier of customer in bank's records. This parameter covers sithuation where customer is borrower or guarantor
+    in: query
+    name: customer-number
+    type: string
+    required: false    
+
+  origination-ou-param:
+    description: OU code for organization unit that originated electronic access arrangement
+    in: query
+    name: origination-ou
+    type: string
+    required: false   
+
+  servicing-ou-param:
+    description: OU code for organization unit that is servicing electronic access arrangement
+    in: query
+    name: servicing-ou
+    type: string
+    required: false   
+
+  agent-param:
+    description: Unique identifier of agent that is servicing electronic access arrangement
+    in: query
+    name: agent
+    type: string
+    required: false  
+ 
+  statuses-param:
+    description: |
+      List of electronic access arrangement statuses to filter arrangements.
+      For a list of possible values see [arrangement-statuses](electronic-access-classifications.html#arrangement-statuses) enumeration.  
+    name: statuses
+    in: query
+    required: false
+    collectionFormat: csv
+    type: array
+    items:
+      type: string
+      x-asee-enumeration: arrangement-statuses
+      enum:
+      - accepted
+      - effective
+      - suspended
+      - completed
+      - termination-requested
+      - terminated
+
+  date-from:
+    description: Includes electronic access arrangements that mature after the specified date
+    in: query
+    name: date-from
+    required: false
+    format: date
+    type: string
+  
+  date-to:
+    description: Includes electronic access arrangements that mature before the specified date
+    in: query
+    name: date-to
+    required: false
+    format: date
+    type: string    
+
+  schema-id-param:
+    name: schema-id
+    description: Identifier of classification schema
+    in: path
+    required: true
+    type: string
+    
+  page-param:
+    name: page
+    in: query
+    description: Page index. For more information see general guidance on [paging](common-getstarted.html#paging)
+    type: integer
+    default: 1
+    x-asee-common: true
+    
+  page-size-param:
+    name: page-size
+    in: query
+    description: Number of items on a page. For more information see general guidance on [paging](common-getstarted.html#paging)
+    required: false
+    type: integer
+    default: 10
+    x-asee-common: true    
+    
+  sort-order-param:
+    description: Sort order (`asc` or `desc`). Default is asc. For more information see general guidance on [sorting](common-getstarted.html#sorting)
+    in: query
+    name: sort-order
+    type: string
+    default: asc
+    enum:
+    - asc
+    - desc
+    x-asee-common: true  
+    
+  sort-by-param:  
+    description: Attribute of the collection item to sort by. For more information see general guidance on [sorting](common-getstarted.html#sorting)
+    in: query
+    name: sort-by
+    type: string
+    x-asee-common: true   
+    
+  include-param:
+    description: List of fields to include in response. For more information see general guidance on [response shaping](common-getstarted.html#shaping)
+    in: query
+    name: include
+    type: array
+    items:
+      type: string
+    collectionFormat: csv
+    x-asee-common: true     
+    
+  trim-param:
+    description: List of fields to trim from response. For more information see general guidance on [response shaping](common-getstarted.html#shaping)
+    in: query
+    name: trim
+    type: array
+    items:
+      type: string
+    collectionFormat: csv
+    x-asee-common: true
+
+definitions:
+
+  classification-value:
+    type: object
+    description: Classification value
+    properties:
+      literal:
+        description: Literal that uniquely identifies classification value
+        type: string
+      code:
+        description: Optional numerical code of classification value
+        type: string
+      description:
+        description: Description of classification value
+        type: string
+      parent-literal:
+        description: Optional literal of parent classification value if schema is hierarchical
+        type: string
+    example:
+      literal: billing
+      code: 2
+      description: Contact may be used to provide party with details of their liabilities to the bank
+      
+  classification-list:
+    description: List of classification schemas
+    type: object
+    properties:
+      items:
+        description: List of classification schemas
+        items:
+          $ref: "#/definitions/classification-info"
+        type: array
+    example:
+      -
+        schema-id: filing-purpose
+        name: Filing Purpose
+        description: List of possible uses of document in business context. Commonly used filing purposes are document, customer-picture
+      -
+        schema-id: folder-purpose
+        name: Folder Purpose
+        description: List of possible uses of a folder in business context.
+        
+  classification-info:
+    description: Basic information on classification schema
+    properties:
+      schema-id:
+        type: string
+        description: Unique literal that identifies the classification schema. Always in `lowercase-dash` convention.
+      name:
+        type: string
+        description: User friendly name of classification
+      description:
+        type: string
+        description: Description of a classification
+    example:
+      schema-id: filing-purpose
+      name: Filing Purpose
+      description: List of possible uses of document in business context. Commonly used filing purposes are document, customer-picture
+      
+  classification:
+    type: object
+    description: Classification schema details
+    properties:
+      schema-id:
+        type: string
+        description: Unique literal that identifies the classification schema. Always in `lowercase-dash` convention.
+      name:
+        type: string
+        description: User friendly name of classification
+      description:
+        type: string
+        description: Description of a classification
+      values:
+        description: List of allowed classification values
+        type: array
+        items:
+          $ref: "#/definitions/classification-value"
+    
+  paged-list:
+    description: List with support for paging
+    properties:
+      total-count:
+        description: Total number of items in collection
+        type: integer
+      page-size:
+        description: Size of the page
+        type: integer
+      page:
+        description: Index of current page
+        type: integer
+      total-pages:
+        description: Total number of pages of set size
+        type: integer
+      sort-order:
+        description: Sort order (`asc` or `desc`). Default is asc
+        type: string
+        enum:
+        - asc
+        - desc
+      sort-by:
+        description: Attribute of the collection item to sort by
+        type: string
+        
+  servicing-info:
+    properties:
+      org-unit:
+        description: OU code for organization unit that is servicing electronic access arrangement.     
+        type: string
+      agent:
+        description: Unique identifier of agent that is servicing electronic access arrangement.
+        type: string  
+
+  origination-info:
+    properties:
+      org-unit:
+        description: OU code for organization unit that is servicing electronic access arrangement.       
+        type: string
+      agent:
+        description: Unique identifier of agent that is servicing electronic access arrangement.
+        type: string    
+      channel:
+        type: string
+        description: Unique identifier (channel code) of channel from which electronic access was originated
+        
+  currency:
+    description: Currency amount and code
+    required:
+    - amount
+    - code
+    properties:
+      amount:
+        type: number
+        format: decimal
+        description: The amount.
+      code:
+        type: string
+        description: ISO 4217 alphanumerical currncy code (EUR, USD)
+     
+  electronic-access-package-list:
+    description: Paged list of electronic access packages.
+    allOf:
+    - $ref: '#/definitions/paged-list'
+    - type: object
+      properties:
+        electronic-access-arrangements:
+          type: array
+          items:
+            $ref: '#/definitions/electronic-access-package-details'
+
+  electronic-access-package-info:
+    description: Basic electronic access package information
+    properties:
+      package-identifier:
+        type: string
+        description: The unique identifier of an electronic access package.
+      name:
+        type: string
+        description: Electronic access package name.
+      description:
+        type: string
+        description: Electronic access package descriptio.
+     
+  electronic-access-package-details:
+    description: Detailed electronic access package information
+    allOf:
+      - $ref: '#/definitions/electronic-access-arrangement-info'
+      - properties:
+          package-identifier:
+            type: string
+            description: The unique identifier of an electronic access package.
+          name:
+            type: string
+            description: Electronic access package name.
+          description:
+            type: string
+            description: Electronic access package descriptio.
+          channels:
+            description: |
+              Collection electronic access channels through which arrangement is available.
+              For a list of possible values see [electronic-access-channel](electronic-access-classifications.html#electronic-access-channel) enumeration.
+            type: array
+            items:
+              type: string
+              enum:
+                - Web 
+                - Mobile
+          notification-preferences:
+            description: Arrangement notification preferences.
+            type: array
+            items:
+              $ref: '#/definitions/notifcation-preference'
+          transfer-limits:
+            type: array
+            items:
+              $ref: '#/definitions/transfer-limit'
+          signature-rules:
+            type: array
+            items:
+              $ref: '#/definitions/signature-rule'     
+              
+    
+  electronic-access-arrangement-list:
+    description: Paged list of electronic access arrangements.
+    allOf:
+    - $ref: '#/definitions/paged-list'
+    - type: object
+      properties:
+        electronic-access-arrangements:
+          type: array
+          items:
+            $ref: '#/definitions/electronic-access-arrangement-info'
+
+  electronic-access-arrangement-info:
+    description: Basic electronic access arrangement information
+    properties:
+      arrangement-number:
+        type: string
+        description: The unique identifier of an arrangement. For account arrangements, this should be the same as primary account number. The only reason for difference are situations when single account covers multiple products.
+      customer-number:
+        type: string
+        description: Unique identifier of customer in bank's record
+      package-identifier:
+        type: string
+        description: Unique identifier of electronic access arrangement package.
+      status:
+        type: string
+        description: |
+          Current status of electronic access arrangement as the position of the arrangement within a life-cycle model which consist of a number of states (statuses). The first lifecycle status considered here is accepted - when customer accepts the offer. Eerlier statuses which exist during offer phase are not included.
+          For a list of possible values see [arrangement-statuses](electronic-access-classifications.html#arrangement-statuses) enumeration.
+        enum:
+        - accepted
+        - canceled
+      status-reason:
+        type: string
+        description: Classification that explains why electronic access arrangement is in certain status
+        x-asse-classification: electronic-access-arrangement-status-reasons      
+      contract-date:
+        type: string
+        format: date-time
+        description: The date when all terms and conditions were agreed upon and contract was signed. This is when deposit passed to `accepted` status.
+      status-date:
+        type: string
+        format: date-time
+        description: The date when last status change occured - since current status is efective.
+      origination:
+        $ref: '#/definitions/origination-info'
+      servicing:
+        $ref: '#/definitions/servicing-info'
+
+  electronic-access-arrangement-details:
+    description: Detailed electronic access arrangement information
+    allOf:
+      - $ref: '#/definitions/electronic-access-arrangement-info'
+      - properties:
+          channels:
+            description: |
+              Collection electronic access channels through which arrangement is available.
+              For a list of possible values see [electronic-access-channel](electronic-access-classifications.html#electronic-access-channel) enumeration.
+            type: array
+            items:
+              type: string
+              enum:
+                - Web 
+                - Mobile
+          notification-preferences:
+            description: Arrangement notification preferences.
+            type: array
+            items:
+              $ref: '#/definitions/notifcation-preference'
+          transfer-limits:
+            description: Transfer limits.
+            type: array
+            items:
+              $ref: '#/definitions/transfer-limit'
+          signature-rules:
+            description: Signature rules.
+            type: array
+            items:
+              $ref: '#/definitions/signature-rule'
+          users:
+            description: Arrangement users.
+            type: array
+            items:
+              $ref: '#/definitions/user-info'
+  
+  
+  establish-electronic-access-command: 
+    required: 
+      - customer-number
+    properties:
+      customer-number:
+        type: string
+        description: Unique identifier of customer in bank's record
+      package-identifier:
+        type: string
+        description: Unique identifier of electronic access arrangement package.
+      channels:
+        description: |
+          Collection electronic access channels through which arrangement is available.
+          For a list of possible values see [electronic-access-channel](electronic-access-classifications.html#electronic-access-channel) enumeration.
+        type: array
+        items:
+          type: string
+          enum:
+            - Web 
+            - Mobile
+      notification-preferences:
+        description: Arrangement notification preferences.
+        type: array
+        items:
+          $ref: '#/definitions/notifcation-preference'
+      servicing-org-unit:
+        description: OU code for organization unit that is servicing electronic access arrangement.     
+        type: string
+      servicing-agent:
+        description: Unique identifier of agent that is servicing electronic access arrangement.
+        type: string  
+      transfer-limits:
+        description: Transfer limits.
+        type: array
+        items:
+          $ref: '#/definitions/transfer-limit'
+      signature-rules:
+        description: Signature rules.
+        type: array
+        items:
+          $ref: '#/definitions/signature-rule'
+      users:
+        description: Arrangement users.
+        type: array
+        items:
+          $ref: '#/definitions/user-info'
+          
+  validate-electronic-access-command: 
+    allOf:
+      - $ref: '#/definitions/establish-electronic-access-command'
+
+
+  cancel-electronic-access-command: 
+    properties:
+      agent:
+        description: Unique identifier of agent that is canceling electronic access arrangment
+        type: string
+      org-unit:
+        description: OU code for organization unit that cancelled electronic access arrangement.       
+        type: string        
+      cancelation-comment:
+        description: Free text comment entered by agent
+        type: string        
+      cancelation-reason:
+        description: Classification that distinguishes between different reasons that electronic access can be canceled for.
+        type: string
+        x-asee-classification: cancelation-reasons
+
+
+  notifcation-preference:
+    type: object
+    description: Notification preference set for specific customer, possibly for specific arrangement
+    properties:
+      arrangement-number:
+        description: Unique identifier of the account arrangement. Used if preference is targetting specific account. If empty or not present it is interpreted that preference applies to all relevant accounts.  
+        type: string
+      notification-group:
+        description: Unique identifier notification group
+        type: string
+      threshold:             
+        description: Threshold at which events trigger notifications in this group
+        type: number
+        format: decimal
+      frequency:
+        description: Frequency at which periodic notifications are generated. Usualy daily, weekly or monthly for periodic notifications. If empty or not present instant notifications are asummed.
+        type: string
+        format: ISO 8601 duration        
+      channels:
+        type: array
+        description: List of channels that are enabled or disabled for specific notification group
+        items:
+          $ref: '#/definitions/channel-switch'
+      
+  channel-switch:
+    type: object
+    description: Indicates if specific channel contact medium is enabled
+    properties:
+      contact-medium:
+        description: |
+          Contact medium used to deliver notifications.
+          For a list of allowed values see [contact-medium](electronic-access-classifications.html#contact-medium) enumeration.              
+        type: string
+        enum: [smartphone-push, email, virtual-inbox, sms]              
+        x-asee-enum: contact-medium
+      is-enabled:
+        description: Indicates if contact medium is enabled for notification group
+        type: boolean   
+
+  limit:
+    description: Base type for all limit kinds
+    type: object
+    required:
+      - kind
+    discriminator: kind
+    properties:
+        kind:
+          type: string
+          enum: [transfer-limit, authorization-limit]
+        type:
+          description: |
+            For a list of possible values see [limit-types](electronic-access-classifications.html#limit-types) enumeration.
+          type: string
+          enum: [transaction-limit, period-limit]
+          x-asee-enumeration: limit-kinds
+        period:
+          description: Period for which limit applies. Specified as a ISO 8601 duration. Usualy dayly or monthly, but could be more specific.
+          type: string
+          format: ISO 8601 duration
+        amount:
+          $ref: '#/definitions/currency'
+        count:
+          description: Number of transactions allowed in the period
+          type: integer
+          format: int32
+          minimum: 0  
+        service:
+          description: |
+            Bank's service tracked by the limit.
+            For a list of possible values see [bank-services](electronic-access-classifications.html#bank-services) classification.
+          type: string
+          x-asee-classification: bank-services
+          default: any
+        channel:
+          type: string
+          description: |
+            Channel tracked by the limit. If channel is not relevant expected value is `any`.
+            For a list of possible values see [channels](electronic-access-classifications.html#channels) enumeration.
+          enum: [online, branch, call-center, atm, pos, vpos, any]
+          x-asee-enumeration: channels
+        
+  transfer-limit:
+    description: Specification od the transfer limit details
+    allOf:
+      - $ref: '#/definitions/limit'
+      
+  authorization-limit:
+    description: Specification od the authorization limit details
+    allOf:
+      - $ref: '#/definitions/limit'
+
+  signature-rule: 
+    properties:
+      service:
+          description: |
+            Bank's service.
+            For a list of possible values see [bank-services](electronic-access-classifications.html#bank-services) classification.
+          type: string
+          x-asee-classification: bank-services
+          default: any
+      amount-upper-limit:
+        type: number
+        format: decimal
+        description: The amount upper limit.
+      amount-lower-limit:
+        type: number
+        format: decimal
+        description: The amount currency code.
+      amount-currency-code:
+        type: string
+        description: ISO 4217 alphanumerical currncy code (EUR, USD)
+      signatory-groups:
+        type: array
+        items:
+          $ref: '#/definitions/signatory-group'
+  
+  signatory-group:
+     properties:
+      identifier:
+        type: string
+        description: Group Identifier. 
+      signatories-count:
+        type: number
+        description: Signatories count. 
+
+  user-info:
+     properties:
+      customer-number:
+        description: User's customer number.
+        type: string
+      first-name:
+        description: User's first name.
+        type: string
+      last-name:
+        description: User's last name.
+        type: string
+      username:
+        description: Username chosen by the user.
+        type: string
+      password:
+        description: Password chosen by the user.
+        type: string
+      email:
+        description: User's e-mail address.
+        type: string
+      phone-number:
+        description: User's mobile phone number (capable of receiving SMS).
+        type: string
+      hint-picture-url:
+        description: Picture that user has chosen to be used in login process as security measure against phishing attacks.
+        type: string
+      signature-type:
+        description: User signature type.
+        type: string
+      roles:
+        description: User's roles.
+        type: array
+        items:
+          type: string
+      authentication-device:
+          $ref: '#/definitions/authentication-device'
+      allow-all-services:
+        type: boolean 
+      allowed-services:
+        description: Collection of user's allowed services.
+        type: array
+        items:
+          type: string    
+        
+  add-user-command:
+     description: Base type for all add user commands
+     type: object
+     required:
+      - kind
+     discriminator: kind
+     properties:
+      kind:
+        type: string
+        enum: [add-new-user-command, add-existing-user-command]
+      authorization-limits:
+        type: array
+        items:
+          $ref: '#/definitions/authorization-limit'
+        
+  add-new-user-command:
+     allOf:
+      - $ref: '#/definitions/add-user-command'
+      - properties:
+          customer-number:
+            description: User related individual.
+            type: string
+          first-name:
+            description: User's first name.
+            type: string
+          last-name:
+            description: User's last name.
+            type: string
+          username:
+            description: Username chosen by the user.
+            type: string
+          password:
+            description: Password chosen by the user.
+            type: string
+          email:
+            description: User's e-mail address.
+            type: string
+          phone-number:
+            description: User's mobile phone number (capable of receiving SMS).
+            type: string
+          hint-picture-url:
+            description: Picture that user has chosen to be used in login process as security measure against phishing attacks.
+            type: string
+          authentication-device:
+              $ref: '#/definitions/authentication-device'
+          roles:
+            description: |
+              User's roles.
+              For a list of possible values see [user-roles](electronic-access-classifications.html#user-roles) enumeration.
+            type: array
+            items:
+              type: string
+              enum:
+                - inputer
+                - authorizer
+                - consent-giver
+          allow-all-services:
+            description: Flag that indicates whether all services are available to user.
+            type: boolean 
+          allowed-services:
+            description: Collection of user's allowed services.
+            type: array
+            items:
+              type: string
+          signature-type:
+            description: User signature type.
+            type: string
+    
+  add-existing-user-command:
+     allOf:
+      - $ref: '#/definitions/add-user-command'
+      - properties:
+          username:
+            description: Existing user username.
+            type: string
+  
+  authentication-device:
+    description: Base type for all authentication devices
+    type: object
+    required:
+    - kind
+    discriminator: kind
+    properties:
+      kind:
+        type: string
+        enum: [mobile-token, hardware-token]
+        description: |
+            For a list of possible values see [authentication-device-kinds](electronic-access-classifications.html#authentication-device-kinds) enumeration.
+    
+  mobile-token:
+    allOf:
+      - $ref: '#/definitions/authentication-device'
+      - properties:
+          phone-number:
+            type: string
+  
+  hardware-token:
+    allOf:
+      - $ref: '#/definitions/authentication-device'
+      - properties:
+          token-serial-number:
+            type: string
